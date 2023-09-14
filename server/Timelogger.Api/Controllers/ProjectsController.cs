@@ -2,21 +2,14 @@
 
 namespace Timelogger.Api.Controllers
 {
-	[Route("api/[controller]")]
-	public class ProjectsController : Controller
+	[ApiVersion("1.0")]
+	public class ProjectsController : ApiBaseController
 	{
 		private readonly ApiContext _context;
 
 		public ProjectsController(ApiContext context)
 		{
 			_context = context;
-		}
-
-		[HttpGet]
-		[Route("hello-world")]
-		public string HelloWorld()
-		{
-			return "Hello Back!";
 		}
 
 		// GET api/projects

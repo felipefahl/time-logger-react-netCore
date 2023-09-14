@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using Timelogger.Api.Extensions;
+using Timelogger.Api.Extensions.ServiceCollection;
 
 namespace Timelogger.Api
 {
@@ -35,10 +36,12 @@ namespace Timelogger.Api
 				builder.AddDebug();
 			});
 
-			services.AddMvc(options => options.EnableEndpointRouting = false);
-
 			services.AddDataBase();
 			services.AddTimeLoggerDependency();
+
+			services.AddMvc(options => options.EnableEndpointRouting = false);
+
+			services.AddVersioning();
 
 			if (_environment.IsDevelopment())
 			{
