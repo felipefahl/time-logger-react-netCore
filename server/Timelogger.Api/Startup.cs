@@ -38,6 +38,7 @@ namespace Timelogger.Api
 
 			services.AddDataBase();
 			services.AddTimeLoggerDependency();
+			services.AddSwagger();
 
 			services.AddMvc(options => options.EnableEndpointRouting = false);
 
@@ -61,6 +62,7 @@ namespace Timelogger.Api
 			}
 
 			app.UseMvc();
+			app.UseSwagger();
 
 			app.SeedDataBase();
 			

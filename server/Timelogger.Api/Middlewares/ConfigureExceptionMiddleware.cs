@@ -20,65 +20,60 @@ namespace Timelogger.Api.Middlewares
 
         public async Task InvokeAsync(HttpContext httpContext)
         {
-            //try
-            //{
-            //    await _next(httpContext);
-            //}
-            //catch (DomainException ex)
-            //{
-            //    _logger.LogError(ex);
-            //    await HandleExceptionAsync(httpContext, ex);
-            //}
-            //catch (AggregateException ex)
-            //{
-            //    IList<DomainException> exceptions = new List<DomainException>();
-
-            //    ex.Handle(x =>
-            //    {
-            //        if (x is DomainException)
-            //            exceptions.Add((DomainException)x);
-
-            //        return x is DomainException;
-            //    });
-
-            //    _logger.LogError(ex);
-            //    await HandleExceptionAsync(httpContext, exceptions.ToArray());
-            //}
-            //catch (Exception ex)
-            //{
-            //    _logger.LogError(ex);
-            //    await HandleExceptionAsync(httpContext, ex);
-            //}
+            try
+            {
+               await _next(httpContext);
+            }
+            catch (BadRequestException ex)
+            {
+               _logger.LogError(ex);
+               await HandleExceptionAsync(httpContext, ex, HttpStatusCode.BadRequest);
+            }
+            catch (NotFoundException ex)
+            {
+               _logger.LogError(ex);
+               await HandleExceptionAsync(httpContext, ex, HttpStatusCode.NotFound);
+            }
+            catch (ValidationException ex)
+            {
+               _logger.LogError(ex);
+               await HandleExceptionAsync(httpContext, ex.Errors);
+            }
+            catch (Exception ex)
+            {
+               _logger.LogError(ex);
+               await HandleExceptionAsync(httpContext, ex, HttpStatusCode.InternalServerError);
+            }
         }
 
-        //private Task HandleExceptionAsync(HttpContext context, params DomainException[] exceptions)
-        //{
-        //    //context.Response.ContentType = "application/json";
-        //    //context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+        private Task HandleExceptionAsync(HttpContext context, IEnumerable<ValidationFailure> failures)
+        {
+           context.Response.ContentType = "application/json";
+           context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 
-        //    //var errors = exceptions.SelectMany(x => x.DomainNotifications).ToDictionary(x => x.Key, x => new[] { x.Value });
+           var errors = exceptions.SelectMany(x => x.DomainNotifications).ToDictionary(x => x.PropertyName, x => new[] { x.ErrorMessage });
 
-        //    //var response = JsonSerializer.Serialize(new DomainExceptionViewModel(
-        //    //    context.Response.StatusCode,
-        //    //    errors,
-        //    //    context.TraceIdentifier));
+           var response = JsonSerializer.Serialize(new DomainExceptionViewModel
+           {
+              context.Response.StatusCode,
+              errors,
+              context.TraceIdentifier
+            }));
 
-        //    //Elastic.Apm.Agent.Tracer.CurrentTransaction?.SetLabel("Response.Body", JsonConvert.SerializeObject(response));
+           return context.Response.WriteAsync(response);
+        }
 
-        //    //return context.Response.WriteAsync(response);
-        //}
+        private Task HandleExceptionAsync(HttpContext context, Exception exception, HttpStatusCode httpStatusCode)
+        {
+           context.Response.ContentType = "application/json";
+           context.Response.StatusCode = (int)httpStatusCode;
 
-        //private Task HandleExceptionAsync(HttpContext context, Exception exception)
-        //{
-        //    //context.Response.ContentType = "application/json";
-        //    //context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-        //    //return context.Response.WriteAsync(JsonSerializer.Serialize(new ExceptionViewModel()
-        //    //{
-        //    //    StatusCode = context.Response.StatusCode,
-        //    //    Message = LanguageResource.ServerWasUnableToProcessTheRequest + " - " + exception.Message,
-        //    //    TraceId = context.TraceIdentifier
-        //    //}));
-        //}
+           return context.Response.WriteAsync(JsonSerializer.Serialize(new ExceptionViewModel
+           {
+              StatusCode = context.Response.StatusCode,
+              Message = exception.Message,
+              TraceId = context.TraceIdentifier
+           }));
+        }
     }
 }
