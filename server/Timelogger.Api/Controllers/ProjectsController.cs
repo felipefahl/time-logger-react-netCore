@@ -1,4 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Threading.Tasks;
+using Timelogger.Api.Dtos;
+using Timelogger.Api.Mappings;
+using Timelogger.Api.Validations;
+using Timelogger.Interfaces.Services;
 
 namespace Timelogger.Api.Controllers
 {
@@ -6,6 +15,7 @@ namespace Timelogger.Api.Controllers
 	/// Api Projects Controller
 	/// </summary>
 	[ApiVersion("1.0")]
+	[Produces("application/json")]
 	public class ProjectsController : ApiBaseController
 	{
 		private readonly IProjectService _projectService;
@@ -24,9 +34,9 @@ namespace Timelogger.Api.Controllers
 		/// <response code="200">OK</response>
 		/// <response code="500">Internal Server Error</response>
 		[ProducesResponseType(statusCode: 200, type: typeof(List<ProjectGetResponseDto>))]
-		[ProducesResponseType(statusCode: 500, type: typeof(Models.ErrorBlock500))]
+		[ProducesResponseType(statusCode: 500, type: typeof(ExceptionDto))]
 		[HttpGet]
-		public Task<IActionResult> Get([FromQuery(Name = "orderByDeadline")] bool orderByDeadline, [FromQuery(Name = "onlyActives")] bool onlyActives)
+		public async Task<IActionResult> Get([FromQuery(Name = "orderByDeadline")] bool orderByDeadline, [FromQuery(Name = "onlyActives")] bool onlyActives)
 		{
 			var projects = await _projectService.ListProjectAsync(orderByDeadline, onlyActives);
 			var projectResponseList = projects.Select(x => x.ToProjectGetResponseDto());
@@ -44,14 +54,14 @@ namespace Timelogger.Api.Controllers
         /// <response code="404">Not Found</response>
 		/// <response code="500">Internal Server Error</response>
 		[ProducesResponseType(statusCode: 200, type: typeof(List<ProjectTimelogGetResponseDto>))]
-		[ProducesResponseType(statusCode: 400, type: typeof(Models.ErrorBlock400))]
-        [ProducesResponseType(statusCode: 404, type: typeof(Models.ErrorBlock404))]
-		[ProducesResponseType(statusCode: 500, type: typeof(Models.ErrorBlock500))]
+		[ProducesResponseType(statusCode: 400, type: typeof(ExceptionDto))]
+        [ProducesResponseType(statusCode: 404, type: typeof(ExceptionDto))]
+		[ProducesResponseType(statusCode: 500, type: typeof(ExceptionDto))]
 		[HttpGet("{id}/TimeLogs")]
-		public Task<IActionResult> Get([FromRoute(Name = "id"), Required] Guid id)
+		public async Task<IActionResult> Get([FromRoute(Name = "id"), Required] Guid id)
 		{
 			var timeLogs = await _projectService.GetProjectTimeLogListAsync(id);
-			var timeLogResponseList = projects.Select(x => x.ToTimelogInsertResponseDto());
+			var timeLogResponseList = timeLogs.Select(x => x.ToProjectTimelogGetResponseDto());
 
 			return Ok(timeLogResponseList);
 		}
@@ -67,20 +77,22 @@ namespace Timelogger.Api.Controllers
         /// <response code="404">Not Found</response>
 		/// <response code="500">Internal Server Error</response>
 		[Consumes("application/json")]
-		[ProducesResponseType(statusCode: 201, type: typeof(TimelogInsertResponseDto))]
-		[ProducesResponseType(statusCode: 400, type: typeof(Models.ErrorBlock400))]
-        [ProducesResponseType(statusCode: 404, type: typeof(Models.ErrorBlock404))]
-		[ProducesResponseType(statusCode: 500, type: typeof(Models.ErrorBlock500))]
+		[ProducesResponseType(statusCode: 200, type: typeof(TimelogInsertResponseDto))]
+		[ProducesResponseType(statusCode: 400, type: typeof(ExceptionDto))]
+        [ProducesResponseType(statusCode: 404, type: typeof(ExceptionDto))]
+		[ProducesResponseType(statusCode: 500, type: typeof(ExceptionDto))]
 		[HttpPost("{id}/TimeLogs")]
-		public Task<IActionResult> Get([FromRoute(Name = "id"), Required] Guid id, [FromBody] TimelogInsertRequestDto timelog)
+		public async Task<IActionResult> InsertTimelog([FromRoute(Name = "id"), Required] Guid id, [FromBody] TimelogInsertRequestDto timelog)
 		{
 			TimelogInsertRequestValidator.Validate(timelog);
 			
 			var projectTimeLog = timelog.ToTimelog(id);
 
-			var insertedTimeLog = await _projectService.InsertProjectTimeLogAsync(id, projectTimeLog);
+			var insertedTimeLog = await _projectService.InsertProjectTimeLogAsync(id, projectTimeLog, timelog.ProjectFinished);
 
-			return Created(_projectService.ListProjectAsync(orderByDeadline, onlyActives));
+			var timelogInsertResult = insertedTimeLog.ToTimelogInsertResponseDto();
+
+			return Ok(timelogInsertResult);
 		}
 	}
 }

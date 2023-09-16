@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Timelogger.Entities;
 
-namespace Timelogger.Entities
+namespace Timelogger.Infrastructure.Entities
 {
 	public class ProjectConfiguration : IEntityTypeConfiguration<Project>
     {

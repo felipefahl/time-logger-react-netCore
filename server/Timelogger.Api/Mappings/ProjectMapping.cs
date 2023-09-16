@@ -1,3 +1,6 @@
+using Timelogger.Api.Dtos;
+using Timelogger.Entities;
+
 namespace Timelogger.Api.Mappings
 {
     public static class ProjectMapping {

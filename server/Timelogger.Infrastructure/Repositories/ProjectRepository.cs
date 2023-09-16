@@ -5,12 +5,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Timelogger.Entities;
-using Timelogger.Interfaces;
 using Timelogger.Interfaces.Repositories;
 
-namespace Timelogger.Repositories
+namespace Timelogger.Infrastructure.Repositories
 {
-    public class ProjectRepository : IProjectRepository, IUnitOfWork
+    public class ProjectRepository : IProjectRepository
     {
         private readonly ApiContext _context;
 
@@ -31,7 +30,7 @@ namespace Timelogger.Repositories
         }
 
         public Task UpdateAsync(Project project){
-            _context.Update(project);
+            _context.Projects.Update(project);
             return Task.CompletedTask;
         }
 

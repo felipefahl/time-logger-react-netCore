@@ -1,3 +1,7 @@
+using System;
+using Timelogger.Api.Dtos;
+using Timelogger.Entities;
+
 namespace Timelogger.Api.Mappings
 {
     public static class TimelogMapping {
@@ -19,7 +23,7 @@ namespace Timelogger.Api.Mappings
                 ProjectId = timelog.ProjectId,
                 DurationMinutes = timelog.DurationMinutes,
                 Note = timelog.Note,
-                ProjectFinished = timelog.Project?.ClosedAt?.HasValue ?? false,
+                ProjectFinished = timelog.Project?.ClosedAt.HasValue ?? false,
             };
         }
 

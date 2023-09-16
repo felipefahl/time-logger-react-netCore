@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Timelogger.Entities;
 
-namespace Timelogger
+namespace Timelogger.Infrastructure
 {
 	public class ApiContext : DbContext
 	{
