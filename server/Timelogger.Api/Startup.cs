@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Hosting;
 using Timelogger.Api.Extensions;
+using Timelogger.Api.Extensions.ServiceCollection;
 
 namespace Timelogger.Api
 {
@@ -35,10 +35,16 @@ namespace Timelogger.Api
 				builder.AddDebug();
 			});
 
-			services.AddMvc(options => options.EnableEndpointRouting = false);
+			services.AddSwagger();
 
 			services.AddDataBase();
 			services.AddTimeLoggerDependency();
+
+			services.AddMvc(options => options.EnableEndpointRouting = false).AddJsonOptions(options => {
+				options.JsonSerializerOptions.IgnoreNullValues = true;
+			});
+
+			services.AddVersioning();
 
 			if (_environment.IsDevelopment())
 			{
@@ -48,6 +54,8 @@ namespace Timelogger.Api
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
+			app.UseCustomException();
+
 			if (env.IsDevelopment())
 			{
 				app.UseCors(builder => builder
@@ -58,6 +66,7 @@ namespace Timelogger.Api
 			}
 
 			app.UseMvc();
+			app.UseSwaggerSetup();
 
 			app.SeedDataBase();
 			

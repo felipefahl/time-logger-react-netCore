@@ -8,14 +8,17 @@ using Timelogger.Exceptions;
 using Timelogger.Interfaces.Repositories;
 using Timelogger.Interfaces.Services;
 
-namespace Timelogger.Services
+namespace Timelogger.Application.Services
 {
     public class ProjectService : IProjectService {
 
         private readonly IProjectRepository _projectRepository;
+        private readonly ITimelogRepository _timelogRepository;
 
-        public ProjectService(IProjectRepository projectRepository){
+        public ProjectService(IProjectRepository projectRepository, ITimelogRepository timelogRepository)
+        {
             _projectRepository = projectRepository;
+            _timelogRepository = timelogRepository;
         }
 
         public async Task<IList<Timelog>> GetProjectTimeLogListAsync(Guid id){
@@ -27,7 +30,7 @@ namespace Timelogger.Services
             return project.TimeLogs.ToList();
         }
 
-        public async Task<Timelog> InsertProjectTimeLogAsync(Guid id, Timelog timelog) {
+        public async Task<Timelog> InsertProjectTimeLogAsync(Guid id, Timelog timelog, bool projectFinished) {
             var project = await _projectRepository.GetAsync(id);
 
             if(project == null)
@@ -36,9 +39,16 @@ namespace Timelogger.Services
             if (project.ClosedAt.HasValue)
                 throw new BadRequestException($"project {id} is closed");
 
+            await _timelogRepository.CreateAsync(timelog);
+
+            if (projectFinished)
+                project.ClosedAt = DateTime.UtcNow;
+
             project.AddTimeLog(timelog);
 
             await _projectRepository.UpdateAsync(project);
+
+            await _projectRepository.CommitAsync();
 
             timelog.Project = project;
             return timelog;
