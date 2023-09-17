@@ -1,17 +1,12 @@
 import * as React from "react";
 import Projects from "./views/Projects";
 import "./style.css";
+import Header from "./components/Header";
 
 export default function App() {
     return (
         <>
-            <header className="bg-gray-900 text-white flex items-center h-12 w-full">
-                <div className="container mx-auto">
-                    <a className="navbar-brand" href="/">
-                        Timelogger
-                    </a>
-                </div>
-            </header>
+           <Header />
 
             <main>
                 <div className="container mx-auto">
