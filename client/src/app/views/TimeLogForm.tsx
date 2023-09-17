@@ -66,6 +66,7 @@ export default function TimeLogForm() {
             <h2>Log Time</h2>
             <FormProvider {...methods}>
                 <form
+                    data-testid="timelog-form"
                     onSubmit={e => e.preventDefault()}
                     noValidate
                     autoComplete="off"

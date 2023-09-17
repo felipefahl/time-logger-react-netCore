@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@testing-library/react": "^12.1.5",
     "axios": "^0.27.2",
     "classnames": "^2.3.2",
     "framer-motion": "^6.5.1",
@@ -14,9 +15,11 @@
     "react-router-dom": "^6.16.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.5",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "@types/react-router-dom": "^5.3.3",
+    "@types/testing-library__react": "^10.2.0",
     "autoprefixer": "^10.4.8",
     "postcss": "^8.4.16",
     "postcss-preset-env": "^7.8.0",

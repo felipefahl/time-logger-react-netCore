@@ -54,6 +54,7 @@ export default function Input ({
         {multiline ? (
           <textarea
             id={id}
+            data-testid={id}
             required={required} 
             disabled={disabled}
             className={cn(input_tailwind, 'min-h-[10rem] max-h-[20rem] resize-y')}
