@@ -1,12 +1,16 @@
+using System;
 using Timelogger.Api.Dtos;
 using Timelogger.Entities;
 
 namespace Timelogger.Api.Mappings
 {
-    public static class ProjectMapping {
-        public static ProjectGetResponseDto ToProjectGetResponseDto(this Project project){
-            
-            return new ProjectGetResponseDto {
+    public static class ProjectMapping
+    {
+        public static ProjectGetResponseDto ToProjectGetResponseDto(this Project project)
+        {
+
+            return new ProjectGetResponseDto
+            {
                 Id = project.Id,
                 Name = project.Name,
                 DeadLine = project.DeadLine,
@@ -15,9 +19,11 @@ namespace Timelogger.Api.Mappings
             };
         }
 
-        public static ProjectCreateResponseDto ToProjectCreateResponseDto(this Project project){
-            
-            return new ProjectCreateResponseDto {
+        public static ProjectCreateResponseDto ToProjectCreateResponseDto(this Project project)
+        {
+
+            return new ProjectCreateResponseDto
+            {
                 Id = project.Id,
                 Name = project.Name,
                 DeadLine = project.DeadLine,
@@ -26,9 +32,11 @@ namespace Timelogger.Api.Mappings
             };
         }
 
-        public static Project ToProject(this ProjectCreateRequestDto projectRequest){
-            
-            return new Project {
+        public static Project ToProject(this ProjectCreateRequestDto projectRequest)
+        {
+
+            return new Project
+            {
                 Id = Guid.NewGuid(),
                 Name = projectRequest.Name,
                 DeadLine = projectRequest.DeadLine,

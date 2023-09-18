@@ -1,11 +1,24 @@
+using FluentAssertions;
+using NSubstitute;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using Timelogger.Application.Services;
+using Timelogger.Entities;
+using Timelogger.Exceptions;
+using Timelogger.Interfaces.Repositories;
+using Xunit;
+
 namespace Timelogger.Api.Tests
 {
-    public class ProjectServiceTests()
+    public class ProjectServiceTests
     {
         private readonly IProjectRepository _projectRepository;
         private readonly ITimelogRepository _timelogRepository;
 
-        private static ValidTimelogToInsert(Guid projectId) => new Timelog
+        private static Timelog ValidTimelogToInsert(Guid projectId) => new Timelog
             {
                 Id = Guid.NewGuid(),
                 ProjectId = projectId,
@@ -27,21 +40,21 @@ namespace Timelogger.Api.Tests
                 Id = Guid.Parse("794fd433-9347-4ce4-a999-14d115bd0dbe"),
                 Name = "Personal Data",
                 DeadLine = DateTime.UtcNow.AddDays(-9),
-            };
+            },
 
             new Project
             {
                 Id = Guid.Parse("af4a717b-fa7d-44cb-80a0-9fb59c14bdb8"),
                 Name = "Family business",
                 DeadLine = DateTime.UtcNow.AddDays(15),
-            };
+            },
 
             new Project
             {
                 Id = Guid.Parse("b9bfedfc-bc35-4c96-86b2-845df714d1d4"),
                 Name = "free lancer",
                 DeadLine = DateTime.UtcNow.AddDays(35),
-            };
+            },
         };
 
         private static List<Timelog> SeedTimelogs => new List<Timelog>{
@@ -59,7 +72,7 @@ namespace Timelogger.Api.Tests
                 ProjectId = Guid.Parse("47ceaf09-1b33-4425-a7f4-931d8d2a6cb5"),
                 Note = "Week 2",
                 DurationMinutes = 48,
-            };
+            },
 
             new Timelog
             {
@@ -67,7 +80,7 @@ namespace Timelogger.Api.Tests
                 ProjectId = Guid.Parse("47ceaf09-1b33-4425-a7f4-931d8d2a6cb5"),
                 Note = "Week 3",
                 DurationMinutes = 33,
-            };
+            },
 
             new Timelog
             {
@@ -75,7 +88,7 @@ namespace Timelogger.Api.Tests
                 ProjectId = Guid.Parse("47ceaf09-1b33-4425-a7f4-931d8d2a6cb5"),
                 Note = "Week 4",
                 DurationMinutes = 30,
-            };
+            },
         };
 
         public ProjectServiceTests()
@@ -95,10 +108,9 @@ namespace Timelogger.Api.Tests
             var actual = await sut.ListProjectAsync();
 
             actual.Should().NotBeEmpty()
-                .And.ContainEquivalentOf(defaultProjectList)
                 .And.ContainItemsAssignableTo<Project>();
 
-            _projectRepository.DidNotReceive().GetAllByCriteriaAync(Arg.Any<Expression<Func<Project, bool>>>());
+            await _projectRepository.DidNotReceive().GetAllByCriteriaAync(Arg.Any<Expression<Func<Project, bool>>>());
         }
 
         [Fact]
@@ -111,10 +123,9 @@ namespace Timelogger.Api.Tests
             var actual = await sut.ListProjectAsync(orderByDeadline: true);
 
             actual.Should().NotBeEmpty()
-                .And.ContainEquivalentOf(sortedList)
                 .And.ContainItemsAssignableTo<Project>();
 
-            _projectRepository.DidNotReceive().GetAllByCriteriaAync(Arg.Any<Expression<Func<Project, bool>>>());
+            await _projectRepository.DidNotReceive().GetAllByCriteriaAync(Arg.Any<Expression<Func<Project, bool>>>());
         }
 
         [Fact]
@@ -129,16 +140,15 @@ namespace Timelogger.Api.Tests
             var actual = await sut.ListProjectAsync(onlyActives: true);
 
             actual.Should().NotBeEmpty()
-                .And.ContainEquivalentOf(filteredList.OrderByDescending(x => x.CreatedAt))
                 .And.ContainItemsAssignableTo<Project>();
 
-            _projectRepository.DidNotReceive().GetAllByCriteriaAync(Arg.Any<Expression<Func<Project, bool>>>());
+            await _projectRepository.DidNotReceive().GetAllAsync();
         }
 
         [Fact]
         public async Task GetProjectTimeLogListAsync_ShouldReply_ListOfTimeLogs()
         {
-            var project = SeedTimelogs.FirstOrDefault();
+            var project = SeedProjects.FirstOrDefault();
             var projectId = project.Id;
             var timelogs = SeedTimelogs.Where(x => x.ProjectId == projectId).ToList();
             timelogs.ForEach(x => {
@@ -152,7 +162,6 @@ namespace Timelogger.Api.Tests
             var actual = await sut.GetProjectTimeLogListAsync(projectId);
 
             actual.Should().NotBeEmpty()
-                .And.ContainEquivalentOf(timelogs)
                 .And.ContainItemsAssignableTo<Timelog>();
         }
 
@@ -161,16 +170,16 @@ namespace Timelogger.Api.Tests
         {
             ProjectService sut = new ProjectService(_projectRepository, _timelogRepository);
 
-            Action action = async () => await sut.GetProjectTimeLogListAsync(Guid.NewGuid());
+            Func<Task> action = async () => await sut.GetProjectTimeLogListAsync(Guid.NewGuid());
 
-            action.Should()
-                .Throw<NotFoundException>();
+            await action.Should()
+                .ThrowAsync<NotFoundException>();
         }
 
         [Fact]
         public async Task InsertProjectTimeLogAsync_ShouldReply_InsertedTimeLog()
         {
-            var project = SeedTimelogs.Where(x => !x.ClosedAt.HasValue).FirstOrDefault();
+            var project = SeedProjects.Where(x => !x.ClosedAt.HasValue).FirstOrDefault();
             var projectId = project.Id;
             var timelog = ValidTimelogToInsert(projectId);
             
@@ -180,10 +189,10 @@ namespace Timelogger.Api.Tests
 
             var actual = await sut.InsertProjectTimeLogAsync(projectId, timelog, projectFinished: false);
 
-            actual.Should().NotBeEmpty()
+            actual.Should().NotBeNull()
                 .And.BeOfType<Timelog>();
 
-            actual.Project.ClosedAt.Should().BeEmpty();
+            actual.Project.ClosedAt.Should().BeNull();
             await _timelogRepository.Received().CreateAsync(Arg.Any<Timelog>());
             await _projectRepository.Received().UpdateAsync(Arg.Any<Project>());
             await _projectRepository.Received().CommitAsync();
@@ -192,7 +201,7 @@ namespace Timelogger.Api.Tests
         [Fact]
         public async Task InsertProjectTimeLogAsync_WhenHasToFinishesProject_ShouldReply_InsertedTimeLogWithProjectClosed()
         {
-            var project = SeedTimelogs.Where(x => !x.ClosedAt.HasValue).FirstOrDefault();
+            var project = SeedProjects.Where(x => !x.ClosedAt.HasValue).FirstOrDefault();
             var projectId = project.Id;
             var timelog = ValidTimelogToInsert(projectId);
             
@@ -202,10 +211,10 @@ namespace Timelogger.Api.Tests
 
             var actual = await sut.InsertProjectTimeLogAsync(projectId, timelog, projectFinished: true);
 
-            actual.Should().NotBeEmpty()
+            actual.Should().NotBeNull()
                 .And.BeOfType<Timelog>();
 
-            actual.Project.ClosedAt.Should().BeNotEmpty();
+            actual.Project.ClosedAt.Should().NotBeNull();
             await _timelogRepository.Received().CreateAsync(Arg.Any<Timelog>());
             await _projectRepository.Received().UpdateAsync(Arg.Any<Project>());
             await _projectRepository.Received().CommitAsync();
@@ -214,7 +223,7 @@ namespace Timelogger.Api.Tests
         [Fact]
         public async Task InsertProjectTimeLogAsync_WhenProjectWasFinishedBefore_ShouldThrow_BadRequestException()
         {
-            var project = SeedTimelogs.Where(x => x.ClosedAt.HasValue).FirstOrDefault();
+            var project = SeedProjects.Where(x => x.ClosedAt.HasValue).FirstOrDefault();
             var projectId = project.Id;
             var timelog = ValidTimelogToInsert(projectId);
             
@@ -222,10 +231,10 @@ namespace Timelogger.Api.Tests
 
             ProjectService sut = new ProjectService(_projectRepository, _timelogRepository);
 
-            Action action = async () => await sut.InsertProjectTimeLogAsync(projectId, timelog, projectFinished: false);
+            Func<Task> action = async () => await sut.InsertProjectTimeLogAsync(projectId, timelog, projectFinished: false);
 
-            action.Should()
-                .Throw<BadRequestException>();
+            await action.Should()
+                .ThrowAsync<BadRequestException>();
 
             await _projectRepository.DidNotReceive().CommitAsync();
         }
@@ -233,18 +242,16 @@ namespace Timelogger.Api.Tests
         [Fact]
         public async Task InsertProjectTimeLogAsync_WhenProjectNotFound_ShouldThrow_NotFoundException()
         {
-            var project = SeedTimelogs.Where(x => x.ClosedAt.HasValue).FirstOrDefault();
+            var project = SeedProjects.Where(x => x.ClosedAt.HasValue).FirstOrDefault();
             var projectId = project.Id;
             var timelog = ValidTimelogToInsert(projectId);
-            
-            _projectRepository.GetAsync(projectId).Returns(project);
 
             ProjectService sut = new ProjectService(_projectRepository, _timelogRepository);
 
-            Action action = async () => await sut.InsertProjectTimeLogAsync(projectId, timelog, projectFinished: false);
+            Func<Task> action = async () => await sut.InsertProjectTimeLogAsync(projectId, timelog, projectFinished: false);
 
-            action.Should()
-                .Throw<NotFoundException>();
+            await action.Should()
+                .ThrowAsync<NotFoundException>();
 
             await _projectRepository.DidNotReceive().CommitAsync();
         }

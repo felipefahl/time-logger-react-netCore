@@ -23,7 +23,9 @@ export default function Input ({
     multiline,
     className, 
     required, 
-    disabled
+    disabled,
+    min,
+    max
   } : TextInputProps) {
     const {
       register,
@@ -64,11 +66,14 @@ export default function Input ({
         ) : (
           <input
             id={id}
+            data-testid={id}
             required={required} 
             disabled={disabled}
             type={type}
             className={cn(input_tailwind)}
             placeholder={placeholder}
+            min={min}
+            max={max}
             {...register(name, validation)}
           />
         )}

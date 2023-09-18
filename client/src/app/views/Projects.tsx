@@ -3,6 +3,7 @@ import Table from "../components/Table";
 import { getAll } from "../api/projects";
 import FilterCheckbox from "../components/FilterCheckbox";
 import { ProjectArray } from "../shared/interfaces/project.interface";
+import { Link } from "react-router-dom";
 
 export default function Projects() {
     
@@ -30,14 +31,14 @@ export default function Projects() {
 
     useEffect(() => {
         if(filterProject){
-            setFilteredProjects(projects.filter(item => item.name.includes(filterProject)))
+            setFilteredProjects(projects.filter(item => item.name.toLowerCase().includes(filterProject)))
         }
     }, [filterProject]);
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();    
         if(searchField)
-            setFilterProject(searchField);
+            setFilterProject(searchField.toLowerCase());
       };
 
       const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

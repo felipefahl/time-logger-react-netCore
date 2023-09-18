@@ -11,7 +11,7 @@ namespace Timelogger.Infrastructure.Entities
             builder.HasKey(p => p.Id);
 
             builder.Property(e => e.DurationMinutes)
-                .IsRequired()
+                .IsRequired();
 
             builder.Property(e => e.Note)
                 .HasMaxLength(100);

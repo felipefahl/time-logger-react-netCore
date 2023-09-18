@@ -40,6 +40,24 @@ export async function postProjectTimeLog(projectId: string | undefined, duration
     await (LogResponse(response));
 }
 
+export async function postProject(data: any)  {
+
+    if(!data)
+        return;
+
+    console.log(JSON.stringify(data));
+
+    const response = await fetch(`${BASE_URL}/projects`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    await (LogResponse(response));
+}
+
 async function LogResponse(response:Response){
     if (response.status === 200) {
         console.log('Time logged successfully.');

@@ -1,19 +1,15 @@
-import React, { useState, useContext } from 'react';
-import { SelectedProjectContext, SelectedProjectType } from '../hooks/SelectedProjectProvider';
+import React, { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { durationMinutes_validation, notes_validation } from '../shared/utils/inputValidations';
 import { BsFillCheckSquareFill } from 'react-icons/bs';
-import { Link, useNavigate } from 'react-router-dom';
-import { postProjectTimeLog } from '../api/projects';
+import { Link } from 'react-router-dom';
+import { postProject } from '../api/projects';
 import Input from '../components/TextInput';
-import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
+import { projectDeadline_validation, projectName_validation } from '../shared/utils/inputValidations';
 
 export default function ProjectForm() {
     
     const [success, setSuccess] = useState(false);
-
-    const navigate = useNavigate();
     const methods = useForm();
 
     const onSubmit = methods.handleSubmit(async data =>
@@ -21,7 +17,7 @@ export default function ProjectForm() {
         setSuccess(false);
 
         try{ 
-            await postProjectTimeLog(data);
+            await postProject(data);
         } catch (error) {
             console.error('An error occurred:', error);
         }
@@ -32,7 +28,7 @@ export default function ProjectForm() {
 
     return (
         <div>            
-            <h2>Log Time</h2>
+        <h1><span style={{fontWeight: 'bold'}}>New Project: </span></h1>
             <FormProvider {...methods}>
                 <form
                     onSubmit={e => e.preventDefault()}
@@ -41,7 +37,6 @@ export default function ProjectForm() {
                     className="container"
                 >
                     <div className="grid gap-5 md:grid-cols-2">
-                        <h1><span style={{fontWeight: 'bold'}}>New Project: </span></h1>
                         <Input {...projectName_validation}/>
                         <Input {...projectDeadline_validation}/>
                     </div>

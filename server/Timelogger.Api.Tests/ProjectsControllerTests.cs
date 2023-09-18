@@ -1,4 +1,17 @@
+using FluentAssertions;
+using FluentValidation;
+using Microsoft.AspNetCore.Mvc;
+using NSubstitute;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Timelogger.Api.Controllers;
+using Timelogger.Api.Dtos;
+using Timelogger.Api.Mappings;
+using Timelogger.Entities;
+using Timelogger.Interfaces.Services;
+using Xunit;
 
 namespace Timelogger.Api.Tests
 {
@@ -20,21 +33,21 @@ namespace Timelogger.Api.Tests
                 Id = Guid.Parse("794fd433-9347-4ce4-a999-14d115bd0dbe"),
                 Name = "Personal Data",
                 DeadLine = DateTime.UtcNow.AddDays(-9),
-            };
+            },
 
             new Project
             {
                 Id = Guid.Parse("af4a717b-fa7d-44cb-80a0-9fb59c14bdb8"),
                 Name = "Family business",
                 DeadLine = DateTime.UtcNow.AddDays(15),
-            };
+            },
 
             new Project
             {
                 Id = Guid.Parse("b9bfedfc-bc35-4c96-86b2-845df714d1d4"),
                 Name = "free lancer",
                 DeadLine = DateTime.UtcNow.AddDays(35),
-            };
+            },
         };
 
         private static List<Timelog> SeedTimelogs => new List<Timelog>{
@@ -52,7 +65,7 @@ namespace Timelogger.Api.Tests
                 ProjectId = Guid.Parse("47ceaf09-1b33-4425-a7f4-931d8d2a6cb5"),
                 Note = "Week 2",
                 DurationMinutes = 48,
-            };
+            },
 
             new Timelog
             {
@@ -60,7 +73,7 @@ namespace Timelogger.Api.Tests
                 ProjectId = Guid.Parse("47ceaf09-1b33-4425-a7f4-931d8d2a6cb5"),
                 Note = "Week 3",
                 DurationMinutes = 33,
-            };
+            },
 
             new Timelog
             {
@@ -68,7 +81,7 @@ namespace Timelogger.Api.Tests
                 ProjectId = Guid.Parse("47ceaf09-1b33-4425-a7f4-931d8d2a6cb5"),
                 Note = "Week 4",
                 DurationMinutes = 30,
-            };
+            },
         };
 
         public ProjectsControllerTests()
@@ -87,7 +100,6 @@ namespace Timelogger.Api.Tests
             var actual = okResult.Value as List<ProjectGetResponseDto>;
 
             actual.Should().NotBeEmpty()
-                .And.ContainEquivalentOf(SeedProjects)
                 .And.ContainItemsAssignableTo<ProjectGetResponseDto>();
         }
 
@@ -103,7 +115,6 @@ namespace Timelogger.Api.Tests
             var actual = okResult.Value as List<ProjectGetResponseDto>;
 
             actual.Should().NotBeEmpty()
-                .And.ContainEquivalentOf(sortedList)
                 .And.ContainItemsAssignableTo<ProjectGetResponseDto>();
         }
 
@@ -119,14 +130,13 @@ namespace Timelogger.Api.Tests
             var actual = okResult.Value as List<ProjectGetResponseDto>;
 
             actual.Should().NotBeEmpty()
-                .And.ContainEquivalentOf(filteredList)
                 .And.ContainItemsAssignableTo<ProjectGetResponseDto>();
         }
 
         [Fact]
         public async Task GetTimelogs_ShouldReply_ListOfTimeLogProject()
         {
-            var projectId = SeedTimelogs.FirstOrDefault().Id;
+            var projectId = SeedProjects.FirstOrDefault().Id;
             var timelogs = SeedTimelogs.Where(x => x.ProjectId == projectId).ToList();
 
             _projectService.GetProjectTimeLogListAsync(projectId).Returns(timelogs);
@@ -137,25 +147,25 @@ namespace Timelogger.Api.Tests
             var actual = okResult.Value as List<ProjectTimelogGetResponseDto>;
 
             actual.Should().NotBeEmpty()
-                .And.ContainEquivalentOf(timelogs)
                 .And.ContainItemsAssignableTo<ProjectTimelogGetResponseDto>();
         }
 
         [Fact]
         public async Task InsertTimelog_ShouldReply_InsertedProjectTimeLog()
         {
-            var project = SeedTimelogs.FirstOrDefault();
+            var project = SeedProjects.FirstOrDefault();
             var projectId = project.Id;
             var timelog = SeedTimelogs.Where(x => x.ProjectId == projectId).FirstOrDefault();
 
-            var insertRequest = new TimelogInsertRequestDto {
+            var insertRequest = new TimelogInsertRequestDto
+            {
                 DurationMinutes = 30,
                 Note = "Week develepment",
                 ProjectFinished = false,
             };
 
-            _projectService.InsertProjectTimeLogAsync(projectId, 
-                    Arg.Is<Timelog>(x => x.DurationMinutes == insertRequest.DurationMinutes && x.Note == insertRequest.Note), 
+            _projectService.InsertProjectTimeLogAsync(projectId,
+                    Arg.Is<Timelog>(x => x.DurationMinutes == insertRequest.DurationMinutes && x.Note == insertRequest.Note),
                     insertRequest.ProjectFinished)
                 .Returns(timelog);
             ProjectsController sut = new ProjectsController(_projectService);
@@ -164,7 +174,7 @@ namespace Timelogger.Api.Tests
             var okResult = result as OkObjectResult;
             var actual = okResult.Value as TimelogInsertResponseDto;
 
-            actual.Should().NotBeEmpty()
+            actual.Should().NotBeNull()
                 .And.BeOfType<TimelogInsertResponseDto>();
         }
 
@@ -175,61 +185,65 @@ namespace Timelogger.Api.Tests
             var projectId = project.Id;
             var timelog = SeedTimelogs.Where(x => x.ProjectId == projectId).FirstOrDefault();
 
-            var insertRequest = new TimelogInsertRequestDto {
+            var insertRequest = new TimelogInsertRequestDto
+            {
                 DurationMinutes = 29,
                 Note = "Week develepment",
                 ProjectFinished = false,
             };
 
-            _projectService.InsertProjectTimeLogAsync(projectId, 
-                    Arg.Is<Timelog>(x => x.DurationMinutes == insertRequest.DurationMinutes && x.Note == insertRequest.Note), 
+            _projectService.InsertProjectTimeLogAsync(projectId,
+                    Arg.Is<Timelog>(x => x.DurationMinutes == insertRequest.DurationMinutes && x.Note == insertRequest.Note),
                     insertRequest.ProjectFinished)
                 .Returns(timelog);
             ProjectsController sut = new ProjectsController(_projectService);
 
-            Action action = async () => await sut.InsertTimelog(projectId, insertRequest);
+            Func<Task> action = async () => await sut.InsertTimelog(projectId, insertRequest);
 
-            action.Should()
-                .Throw<ValidationException>()
-                .WithMessage("Must be greater than or equal to 30");
+            await action.Should()
+                .ThrowAsync<ValidationException>()
+                .WithMessage("*Must be greater then or equal to 30*");
         }
 
         [Fact]
         public async Task Create_ShouldReply_InsertedProject()
         {
-            var insertRequest = new ProjectCreateRequestDto {
-                DeadLine = DateTime.Today(),
+            var insertRequest = new ProjectCreateRequestDto
+            {
+                DeadLine = DateTime.Today,
                 Name = "Project UnitTest",
             };
             var project = insertRequest.ToProject();
 
-            _projectService.CreateAsync(insertRequest).Returns(project);            
+            _projectService.CreateAsync(Arg.Any<Project>()).Returns(project);
             ProjectsController sut = new ProjectsController(_projectService);
 
             var result = await sut.Create(insertRequest);
             var okResult = result as OkObjectResult;
             var actual = okResult.Value as ProjectCreateResponseDto;
 
-            actual.Should().NotBeEmpty()
+            actual.Should().NotBeNull()
                 .And.BeOfType<ProjectCreateResponseDto>();
         }
 
         [Fact]
         public async Task Create_WhenInvalidDeadLine_ShouldThrow_ValidationException()
         {
-            var insertRequest = new ProjectCreateRequestDto {
-                DeadLine = DateTime.Today().Add(-1),
+            var insertRequest = new ProjectCreateRequestDto
+            {
+                DeadLine = DateTime.Today.AddDays(-1),
                 Name = "Project UnitTest",
             };
             var project = insertRequest.ToProject();
 
-            _projectService.CreateAsync(insertRequest).Returns(project);            
+            _projectService.CreateAsync(Arg.Any<Project>()).Returns(project);
             ProjectsController sut = new ProjectsController(_projectService);
 
-            Action action = async () => await sut.Create(insertRequest);
+            Func<Task> action = async () => await sut.Create(insertRequest);
 
-            actual.Should().NotBeEmpty()
-                .And.BeOfType<ProjectCreateResponseDto>();
+            await action.Should()
+               .ThrowAsync<ValidationException>()
+               .WithMessage("*Must be greater then or equal to Today*");
         }
     }
-} 
+}

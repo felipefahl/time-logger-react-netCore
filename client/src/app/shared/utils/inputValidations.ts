@@ -17,6 +17,7 @@
     name: 'durationMinutes',
     label: 'Durantion (Minutes)',
     type: 'number',
+    min: 30,
     id: 'durationMinutes',
     placeholder: 'write a random number',
     validation: {
@@ -34,7 +35,6 @@
   export const projectName_validation = {
     name: 'name',
     label: 'Name',
-    type: 'number',
     id: 'name',
     placeholder: 'Name ...',
     validation: {
@@ -54,23 +54,11 @@
     label: 'Deadline',
     type: 'date',
     id: 'deadline',
-    placeholder: 'YYYY-MM-DD',
+    min: `${(new Date()).toISOString().split('T')[0]}`,
     validation: {
-      positive: {
-        value: v =>  new Date(v) >= new Date(),
-        message: 'Must be greater then or equal to Today',
-      },
-      valueAsDate: {
-        value: true,
-        message: 'not valid',
-      },
       required: {
         value: true,
         message: 'required',
-      },
-      pattern: {
-        value: /^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$/,
-        message: 'not valid',
       },
     },
   }
