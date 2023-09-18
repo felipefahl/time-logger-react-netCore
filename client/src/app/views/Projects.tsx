@@ -52,9 +52,9 @@ export default function Projects() {
         <>
             <div className="flex items-center my-6">
                 <div className="w-1/2">
-                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Add entry
-                    </button>
+                    <Link className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" to="/add-project" relative="path">
+                        Add Project
+                    </Link>
                 </div>
 
                 <div className="w-1/2 flex justify-end">

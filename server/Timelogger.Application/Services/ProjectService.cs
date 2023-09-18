@@ -21,6 +21,10 @@ namespace Timelogger.Application.Services
             _timelogRepository = timelogRepository;
         }
 
+        public async Task<Project> CreateAsync(Project project){
+            return await _projectRepository.CreateAsync(project);
+        }
+
         public async Task<IList<Timelog>> GetProjectTimeLogListAsync(Guid id){
             var project = await _projectRepository.GetAsync(id);
 

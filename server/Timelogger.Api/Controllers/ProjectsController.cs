@@ -36,7 +36,8 @@ namespace Timelogger.Api.Controllers
 		[ProducesResponseType(statusCode: 200, type: typeof(List<ProjectGetResponseDto>))]
 		[ProducesResponseType(statusCode: 500, type: typeof(ExceptionDto))]
 		[HttpGet]
-		public async Task<IActionResult> Get([FromQuery(Name = "orderByDeadline")] bool orderByDeadline, [FromQuery(Name = "onlyActives")] bool onlyActives)
+		public async Task<IActionResult> GetList([FromQuery(Name = "orderByDeadline")] bool orderByDeadline = false, 
+			[FromQuery(Name = "onlyActives")] bool onlyActives = false)
 		{
 			var projects = await _projectService.ListProjectAsync(orderByDeadline, onlyActives);
 			var projectResponseList = projects.Select(x => x.ToProjectGetResponseDto());
@@ -58,7 +59,7 @@ namespace Timelogger.Api.Controllers
         [ProducesResponseType(statusCode: 404, type: typeof(ExceptionDto))]
 		[ProducesResponseType(statusCode: 500, type: typeof(ExceptionDto))]
 		[HttpGet("{id}/TimeLogs")]
-		public async Task<IActionResult> Get([FromRoute(Name = "id"), Required] Guid id)
+		public async Task<IActionResult> GetTimelogs([FromRoute(Name = "id"), Required] Guid id)
 		{
 			var timeLogs = await _projectService.GetProjectTimeLogListAsync(id);
 			var timeLogResponseList = timeLogs.Select(x => x.ToProjectTimelogGetResponseDto());
@@ -72,7 +73,7 @@ namespace Timelogger.Api.Controllers
 		/// <remarks>This functionality allows you register a timelog for a existing project.</remarks>
 		/// <param name="id">Project Id</param>
 		/// <param name="timelog">Post the necessary information to register a timelog</param>
-		/// <response code="201">Created</response>
+		/// <response code="200">Ok</response>
 		/// <response code="400">Bad Request</response>
         /// <response code="404">Not Found</response>
 		/// <response code="500">Internal Server Error</response>
@@ -93,6 +94,30 @@ namespace Timelogger.Api.Controllers
 			var timelogInsertResult = insertedTimeLog.ToTimelogInsertResponseDto();
 
 			return Ok(timelogInsertResult);
+		}
+
+		/// <summary>
+		/// Create Project
+		/// </summary>
+		/// <remarks>This functionality allows you to create a project.</remarks>
+		/// <param name="project">Post the necessary information to create a project</param>
+		/// <response code="200">Ok</response>
+		/// <response code="500">Internal Server Error</response>
+		[Consumes("application/json")]
+		[ProducesResponseType(statusCode: 200, type: typeof(ProjectCreateResponseDto))]
+		[ProducesResponseType(statusCode: 500, type: typeof(ExceptionDto))]
+		[HttpPost]
+		public async Task<IActionResult> Create([FromBody] ProjectCreateRequestDto project)
+		{
+			ProjectCreateRequestValidator.Validate(project);
+			
+			var project = project.ToProject();
+
+			var insertedProject = await _projectService.CreateAsync(project);
+
+			var projectInsertResult = insertedProject.ToProjectCreateResponseDto();
+
+			return Ok(projectInsertResult);
 		}
 	}
 }

@@ -22,6 +22,11 @@ export default function Routes() {
             element: <ProjectTimeLogs />,
             errorElement: <ErrorPage />,
         },
+        {
+            path: "/add-project",
+            element: <AddTimeLogger />,
+            errorElement: <ErrorPage />,
+        },
       ]);
       
         return (

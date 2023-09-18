@@ -37,5 +37,10 @@ namespace Timelogger.Infrastructure.Repositories
         public async Task CommitAsync() {
             await _context.SaveChangesAsync();
         }
+
+        public async Task CreateAsync(Project project)
+        {
+            await _context.Timelogs.AddAsync(timelog);
+        }
     }
 }

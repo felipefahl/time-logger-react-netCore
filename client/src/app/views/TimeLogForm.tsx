@@ -1,4 +1,3 @@
-// components/TimeLogForm.tsx
 import React, { useState, useContext } from 'react';
 import { SelectedProjectContext, SelectedProjectType } from '../hooks/SelectedProjectProvider';
 import { FormProvider, useForm } from 'react-hook-form';

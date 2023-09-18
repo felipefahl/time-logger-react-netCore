@@ -12,5 +12,6 @@ namespace Timelogger.Interfaces.Repositories
         Task<IEnumerable<Project>> GetAllByCriteriaAync(Expression<Func<Project, bool>> expression);
         Task<IEnumerable<Project>> GetAllAsync();
         Task UpdateAsync(Project project);
+        Task CreateAsync(Project project);
     }
 }
