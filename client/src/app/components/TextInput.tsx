@@ -87,6 +87,7 @@ export default function Input ({
   const InputError = function ({ message } : InputError) {
     return (
       <motion.p
+        data-testid={message}
         className="flex items-center gap-1 px-2 font-semibold text-red-500 bg-red-100 rounded-md"
         {...framer_error}
       >

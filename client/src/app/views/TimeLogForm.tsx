@@ -1,5 +1,4 @@
-import React, { useState, useContext } from 'react';
-import { SelectedProjectContext, SelectedProjectType } from '../hooks/SelectedProjectProvider';
+import React, { useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { durationMinutes_validation, notes_validation } from '../shared/utils/inputValidations';
 import { BsFillCheckSquareFill } from 'react-icons/bs';
@@ -8,6 +7,7 @@ import { postProjectTimeLog } from '../api/projects';
 import Input from '../components/TextInput';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
+import { useSelectedProject } from '../hooks/SelectedProjectProvider';
 
 interface AddTimeLog{
     durationMinutes: number;
@@ -16,7 +16,7 @@ interface AddTimeLog{
 
 export default function TimeLogForm() {
     
-    const { selectedPoject } = useContext(SelectedProjectContext) as SelectedProjectType;
+    const { selectedPoject } = useSelectedProject();
     const [success, setSuccess] = useState(false);
 
     const navigate = useNavigate();
@@ -36,15 +36,15 @@ export default function TimeLogForm() {
         }
 
         if(projectFinished){
-            window.alert("Project finished com successfully");
+            window.alert("Project finished successfully");
             navigate('/');
         }
-
         methods.reset();
         setSuccess(true);
     };
 
-    const onSubmit = methods.handleSubmit(async data => await 
+    const onSubmit = methods.handleSubmit(async data => {
+        return await 
         confirmAlert({
             title: 'Finishing the project',
             message: 'Do you want to finish the project?',
@@ -58,7 +58,8 @@ export default function TimeLogForm() {
                 onClick: async () => await saveProjectTimeLog(data, false)
               }
             ]
-          }));
+          })})
+        ;
 
     return (
         <div>            
@@ -87,7 +88,8 @@ export default function TimeLogForm() {
                         
                     </div>
                     <button
-                         onClick={onSubmit}       
+                        data-testid="log-time-submit"
+                        onClick={onSubmit}       
                         className="inline-block p-5 rounded-md bg-blue-600 font-semibold text-white flex items-center gap-1 hover:bg-blue-800"
                     >
                         Log Time

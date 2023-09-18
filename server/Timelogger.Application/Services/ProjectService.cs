@@ -64,7 +64,7 @@ namespace Timelogger.Application.Services
             return timelog;
         }
 
-        public async Task<IReadOnlyList<Project>> ListProjectAsync(bool orderByDeadline = false, bool onlyActives = false)
+        public async Task<IReadOnlyList<Project>> ListProjectAsync(bool sortByDeadline = false, bool onlyActives = false)
         {
             var projects = Enumerable.Empty<Project>();
 
@@ -76,7 +76,7 @@ namespace Timelogger.Application.Services
             else
                 projects = await _projectRepository.GetAllAsync();
 
-            projects = orderByDeadline ? projects.OrderBy(x => x.DeadLine).ToList() : projects.OrderByDescending(x => x.CreatedAt).ToList();
+            projects = sortByDeadline ? projects.OrderBy(x => x.DeadLine).ToList() : projects.OrderByDescending(x => x.CreatedAt).ToList();
 
             return projects.ToList().AsReadOnly();
         }

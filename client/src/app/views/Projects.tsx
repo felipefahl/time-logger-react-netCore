@@ -11,14 +11,14 @@ export default function Projects() {
     const [filterProject, setFilterProject] = useState("");
     const [projects, setProjects] = useState<ProjectArray>([]);
     const [filteredProjects, setFilteredProjects] = useState<ProjectArray>([]);
-    const [orderByDeadline, setOrderByDeadline] = useState(false);
+    const [sortByDeadline, setSortByDeadline] = useState(false);
     const [onlyActives, setOnlyActives] = useState(false);
 
     useEffect(() => {
         setSearchField("");
         const fetchData = async () => {
             try {
-                const data = await getAll(orderByDeadline, onlyActives);
+                const data = await getAll(sortByDeadline, onlyActives);
                 setProjects(data);
                 setFilteredProjects(data);
             } catch (error) {
@@ -27,7 +27,7 @@ export default function Projects() {
         };
 
         fetchData();
-    }, [orderByDeadline, onlyActives]);
+    }, [sortByDeadline, onlyActives]);
 
     useEffect(() => {
         if(filterProject){
@@ -80,8 +80,8 @@ export default function Projects() {
             <div>
                 <FilterCheckbox
                     labelText="Sort by Deadline:"
-                    checked={orderByDeadline}
-                    onChange={() => setOrderByDeadline(!orderByDeadline)}
+                    checked={sortByDeadline}
+                    onChange={() => setSortByDeadline(!sortByDeadline)}
                 />
             </div>
             <div>

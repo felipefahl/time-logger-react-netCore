@@ -26,8 +26,8 @@
         message: 'required',
       },
       min: {
-        value: 29,
-        message: 'Must be greater than 30'
+        value: 30,
+        message: 'Must be greater than or equal to 30'
       }
     },
   }

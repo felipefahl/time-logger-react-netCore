@@ -2,83 +2,69 @@ import { fireEvent, render, waitFor } from "@testing-library/react";
 import React from "react";
 import TimeLogForm from "../app/views/TimeLogForm";
 
-const mockedHistoryPush = jest.fn();
-const mockedSignIn = jest.fn();
-const mockedAddToast = jest.fn();
 
-jest.mock('../api/projects', () => {
+const mockedNavigate = jest.fn();
+
+jest.mock('../app/api/projects', () => ({
+  postProjectTimeLog: jest.fn(),
+}));
+
+jest.mock('../app/hooks/SelectedProjectProvider', () => {
   return {
-    postProjectTimeLog: () => ({ push: mockedHistoryPush }),
-    Link: ({ children }: { children: React.ReactNode }) => children,
+    useSelectedProject: () => ({
+      selectedPoject: { id: '5ba69926-af27-4a2c-b89d-a96d0b0c765c', name: 'Test Project' },
+    }),
   };
 });
 
 jest.mock('react-router-dom', () => {
   return {
-    useHistory: () => ({ push: mockedHistoryPush }),
     Link: ({ children }: { children: React.ReactNode }) => children,
+    useNavigate: () => mockedNavigate
   };
 });
 
-jest.mock('../../hooks/auth', () => {
-  return {
-    useAuth: () => ({
-      signIn: mockedSignIn,
-    }),
-  };
-});
+describe('TimeLogForm', () => {
+  it('submits the form successfully when "Log Time" button is clicked', async () => {
+    const { findByTestId, findByText } = render(<TimeLogForm />);
+    
+    const durationMinutesInput = await findByTestId('durationMinutes') as HTMLInputElement ;
+    const notesInput = await findByTestId('note') as HTMLInputElement ;
+    
+    fireEvent.change(durationMinutesInput, { target: { value: '30' } });
+    fireEvent.change(notesInput, { target: { value: 'Test notes' } });
+    
+    fireEvent.click(await findByTestId('log-time-submit'));
 
-jest.mock('../../hooks/toast', () => {
-  return {
-    useToast: () => ({
-      addToast: mockedAddToast,
-    }),
-  };
-});
+    fireEvent.click(await findByText("Yes"));  
+    
+    
+    jest.spyOn(window, 'alert').mockImplementation(() => {});
 
-describe("<TimeLogForm />", () => {
-  test("should display a blank login form when render", async () => {
-    const { getByPlaceholderText, getByText, findByTestId } = render(<TimeLogForm />);
-    const timelogForm = await findByTestId("timelog-form");
-
-    const emailField = getByPlaceholderText('E-mail');
-    const emailPasswordField = getByPlaceholderText('Senha');
-    const buttonElement = getByText('Entrar');
-
-    fireEvent.change(emailField, {
-      target: { value: 'email@email.com' },
-    });
-    fireEvent.change(emailPasswordField, {
-      target: { value: '123321' },
-    });
-
-    fireEvent.click(buttonElement);
-
-    await waitFor(() => {
-      expect(timelogForm).toHaveFormValues({
-        username: "",
-      });
-    });
+    await waitFor(() => expect(global.alert).toHaveBeenCalledWith('Project finished successfully'));
+    
+    expect(durationMinutesInput.value).toBe('');
+    expect(notesInput.value).toBe('');
   });
-});
 
+  it('displays an error message for duration less than 30 minutes', async () => {
+    const { findByTestId } = render(<TimeLogForm />);
+    
+    const durationMinutesInput = await findByTestId('durationMinutes') as HTMLInputElement ;
+    const notesInput = await findByTestId('note') as HTMLInputElement ;
+    
+    fireEvent.change(durationMinutesInput, { target: { value: '29' } });
+    fireEvent.change(notesInput, { target: { value: 'Test notes' } });
 
-//Example
-test("should submit the form with username, password, and remember", async () => {
-  const onSubmit = jest.fn();
-  const { findByTestId } = renderLoginForm({
-    onSubmit,
-    shouldRemember: false
+    fireEvent.click(await findByTestId('log-time-submit'));    
+    
+    jest.spyOn(window, 'alert');
+
+    await waitFor(() => expect(global.alert).not.toHaveBeenCalledWith('Project finished successfully'));
+    
+    const errorMessage = await findByTestId('Must be greater than or equal to 30');
+    expect(errorMessage).not.toBeNull;
+    
+    expect(durationMinutesInput.value).toBe("29");
   });
-  const username = await findByTestId("username");
-  const password = await findByTestId("password");
-  const remember = await findByTestId("remember");
-  const submit = await findByTestId("submit");
-
-  fireEvent.change(username, { target: { value: "test" } });
-  fireEvent.change(password, { target: { value: "password" } });
-  fireEvent.click(remember);
-  fireEvent.click(submit);
-
-  expect(onSubmit).toHaveBeenCalledWith("test", "password", true);
 });

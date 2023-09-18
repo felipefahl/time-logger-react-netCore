@@ -1,11 +1,11 @@
-import React, { useContext, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { SelectedProjectContext, SelectedProjectType } from "../hooks/SelectedProjectProvider";
 import TimeLogForm from "./TimeLogForm";
 import Header from "../components/Header";
+import { useSelectedProject } from "../hooks/SelectedProjectProvider";
 
 export default function AddTimeLogger() {
-    const { selectedPoject } = useContext(SelectedProjectContext) as SelectedProjectType;
+    const { selectedPoject } = useSelectedProject();
     const navigate = useNavigate();
     
 

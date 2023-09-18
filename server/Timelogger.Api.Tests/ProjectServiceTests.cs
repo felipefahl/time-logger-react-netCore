@@ -120,7 +120,7 @@ namespace Timelogger.Api.Tests
             _projectRepository.GetAllAsync().Returns(SeedProjects);
             ProjectService sut = new ProjectService(_projectRepository, _timelogRepository);
 
-            var actual = await sut.ListProjectAsync(orderByDeadline: true);
+            var actual = await sut.ListProjectAsync(sortByDeadline: true);
 
             actual.Should().NotBeEmpty()
                 .And.ContainItemsAssignableTo<Project>();

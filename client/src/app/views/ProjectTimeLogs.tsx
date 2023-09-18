@@ -1,13 +1,13 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { getAllProjectTimeLog } from "../api/projects";
-import { SelectedProjectContext, SelectedProjectType } from "../hooks/SelectedProjectProvider";
 import { TimeLogArray } from "../shared/interfaces/projectTimeLog.interface";
 import TableTimeLog from "../components/TableTimelog";
 import Header from "../components/Header";
 import { Link } from "react-router-dom";
+import { useSelectedProject } from "../hooks/SelectedProjectProvider";
 
 export default function Projects() {    
-    const { selectedPoject } = useContext(SelectedProjectContext) as SelectedProjectType;
+    const { selectedPoject } = useSelectedProject();
 
     const [timeLogs, setTimeLogs] = useState<TimeLogArray>([]);
 

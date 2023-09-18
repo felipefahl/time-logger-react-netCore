@@ -1,7 +1,7 @@
 const BASE_URL = "http://localhost:3001/api/v1";
 
-export async function getAll(orderByDeadline: boolean, onlyActives: boolean)  {
-    const response = await fetch(`${BASE_URL}/projects/?orderByDeadline=${orderByDeadline}&onlyActives=${onlyActives}`);
+export async function getAll(sortByDeadline: boolean, onlyActives: boolean)  {
+    const response = await fetch(`${BASE_URL}/projects/?sortByDeadline=${sortByDeadline}&onlyActives=${onlyActives}`);
 
     await (LogResponse(response));
     return response.json();

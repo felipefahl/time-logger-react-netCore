@@ -29,17 +29,17 @@ namespace Timelogger.Api.Controllers
         /// Get a list of projects 
         /// </summary>
         /// <remarks>This functionality allows you get a list of projects.</remarks>
-        /// <param name="orderByDeadline">A boolean, if true, will sort the list by most recently deadlines</param>
+        /// <param name="sortByDeadline">A boolean, if true, will sort the list by most recently deadlines</param>
         /// <param name="onlyActives">A boolean, if true, will filter only projects that are not finished yet</param>
         /// <response code="200">OK</response>
         /// <response code="500">Internal Server Error</response>
         [ProducesResponseType(statusCode: 200, type: typeof(List<ProjectGetResponseDto>))]
         [ProducesResponseType(statusCode: 500, type: typeof(ExceptionDto))]
         [HttpGet]
-        public async Task<IActionResult> GetList([FromQuery(Name = "orderByDeadline")] bool orderByDeadline = false,
+        public async Task<IActionResult> GetList([FromQuery(Name = "sortByDeadline")] bool sortByDeadline = false,
             [FromQuery(Name = "onlyActives")] bool onlyActives = false)
         {
-            var projects = await _projectService.ListProjectAsync(orderByDeadline, onlyActives);
+            var projects = await _projectService.ListProjectAsync(sortByDeadline, onlyActives);
             var projectResponseList = projects.Select(x => x.ToProjectGetResponseDto()).ToList();
 
             return Ok(projectResponseList);

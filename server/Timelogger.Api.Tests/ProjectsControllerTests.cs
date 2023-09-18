@@ -92,7 +92,7 @@ namespace Timelogger.Api.Tests
         [Fact]
         public async Task GetList_ShouldReply_ListOfProjects()
         {
-            _projectService.ListProjectAsync(orderByDeadline: false, onlyActives: false).Returns(SeedProjects);
+            _projectService.ListProjectAsync(sortByDeadline: false, onlyActives: false).Returns(SeedProjects);
             ProjectsController sut = new ProjectsController(_projectService);
 
             var result = await sut.GetList();
@@ -107,10 +107,10 @@ namespace Timelogger.Api.Tests
         public async Task GetList_WhenSortByDeadline_ShouldReply_ListOfProjectsSorted()
         {
             var sortedList = SeedProjects.OrderBy(x => x.DeadLine).ToList();
-            _projectService.ListProjectAsync(orderByDeadline: true, onlyActives: false).Returns(sortedList);
+            _projectService.ListProjectAsync(sortByDeadline: true, onlyActives: false).Returns(sortedList);
             ProjectsController sut = new ProjectsController(_projectService);
 
-            var result = await sut.GetList(orderByDeadline: true);
+            var result = await sut.GetList(sortByDeadline: true);
             var okResult = result as OkObjectResult;
             var actual = okResult.Value as List<ProjectGetResponseDto>;
 
@@ -122,7 +122,7 @@ namespace Timelogger.Api.Tests
         public async Task GetList_WhenFilterByActives_ShouldReply_ListOfProjectsSorted()
         {
             var filteredList = SeedProjects.Where(x => x.ClosedAt.HasValue).ToList();
-            _projectService.ListProjectAsync(orderByDeadline: false, onlyActives: true).Returns(filteredList);
+            _projectService.ListProjectAsync(sortByDeadline: false, onlyActives: true).Returns(filteredList);
             ProjectsController sut = new ProjectsController(_projectService);
 
             var result = await sut.GetList(onlyActives: true);

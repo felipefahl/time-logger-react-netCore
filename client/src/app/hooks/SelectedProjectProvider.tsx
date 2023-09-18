@@ -1,18 +1,14 @@
-import React, { ReactNode, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Project } from '../shared/interfaces/project.interface';
 
-interface Props {
-    children?: ReactNode
-}
-
-export type SelectedProjectType = {
+interface SelectedProjectType {
     selectedPoject: Project | undefined;
     selectPoject: (project: Project) => void;
   };
 
-export const SelectedProjectContext = React.createContext<SelectedProjectType | null>(null);
+const SelectedProjectContext = React.createContext<SelectedProjectType>({} as SelectedProjectType);
 
-export default function SelectedProjectProvider({children} : Props) {
+const SelectedProjectProvider: React.FC = ({ children }) => {
     const [selectedPoject, setSelectedPoject] = useState<Project>();
 
     const selectPoject = (project: Project) => {
@@ -25,3 +21,10 @@ export default function SelectedProjectProvider({children} : Props) {
         </SelectedProjectContext.Provider>
     );
 }
+
+function useSelectedProject(): SelectedProjectType {
+    const context = useContext(SelectedProjectContext);
+    return context;
+  }
+  
+  export { SelectedProjectProvider, useSelectedProject };
