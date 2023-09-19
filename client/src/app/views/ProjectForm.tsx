@@ -27,7 +27,7 @@ export default function ProjectForm() {
        });
 
     return (
-        <div>            
+        <>            
         <h1><span style={{fontWeight: 'bold'}}>New Project: </span></h1>
             <FormProvider {...methods}>
                 <form
@@ -63,6 +63,6 @@ export default function ProjectForm() {
                     </div>
                 </form>
             </FormProvider>
-        </div>
+        </>
     );
 }

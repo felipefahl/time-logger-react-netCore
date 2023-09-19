@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Serilog;
 
 namespace Timelogger.Api.Extensions
 {

@@ -1,4 +1,4 @@
-import { fireEvent, render, waitFor } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import React from "react";
 import ProjectForm from "../app/views/ProjectForm";
 
@@ -11,6 +11,7 @@ jest.mock('../app/api/projects', () => ({
 
 jest.mock('react-router-dom', () => {
   return {
+    Link: ({ children }: { children: React.ReactNode }) => children,
     useNavigate: () => mockedNavigate
   };
 });
@@ -22,13 +23,13 @@ describe('ProjectForm', () => {
     const nameMinutesInput = await findByTestId('name') as HTMLInputElement ;
     const deadlineInput = await findByTestId('deadline') as HTMLInputElement ;
     
-    fireEvent.change(nameMinutesInput, { target: { value: '30' } });
+    fireEvent.change(nameMinutesInput, { target: { value: 'name project Test' } });
     fireEvent.change(deadlineInput, { target: { value: `${(new Date()).toISOString().split('T')[0]}` } });
     
     fireEvent.click(await findByTestId('project-submit'));
-    
-    expect(durationMinutesInput.value).toBe('');
-    expect(notesInput.value).toBe('');
+
+    const successMessage = await findByText('Form has been submitted successfully');
+    expect(successMessage).not.toBeNull;
   });
 
   it('displays an error message deadline less than today', async () => {
@@ -45,6 +46,6 @@ describe('ProjectForm', () => {
     const errorMessage = await findByTestId('Must be greater than or equal to today');
     expect(errorMessage).not.toBeNull;
     
-    expect(durationMinutesInput.value).toBe(`${(new Date(Date.now() - 86400000)).toISOString().split('T')[0]}`);
+    expect(deadlineInput.value).toBe(`${(new Date(Date.now() - 86400000)).toISOString().split('T')[0]}`);
   });
 });
