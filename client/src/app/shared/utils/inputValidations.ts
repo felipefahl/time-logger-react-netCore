@@ -60,5 +60,9 @@
         value: true,
         message: 'required',
       },
+      min: {
+        value: `${(new Date()).toISOString().split('T')[0]}`,
+        message: 'Must be greater than or equal to today'
+      }
     },
   }

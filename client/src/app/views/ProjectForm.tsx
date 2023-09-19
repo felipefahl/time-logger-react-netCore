@@ -31,6 +31,7 @@ export default function ProjectForm() {
         <h1><span style={{fontWeight: 'bold'}}>New Project: </span></h1>
             <FormProvider {...methods}>
                 <form
+                    data-testid="project-form"
                     onSubmit={e => e.preventDefault()}
                     noValidate
                     autoComplete="off"
@@ -50,7 +51,8 @@ export default function ProjectForm() {
                         
                     </div>
                     <button
-                         onClick={onSubmit}       
+                        data-testid="project-submit"
+                        onClick={onSubmit}       
                         className="inline-block p-5 rounded-md bg-blue-600 font-semibold text-white flex items-center gap-1 hover:bg-blue-800"
                     >
                         Save
