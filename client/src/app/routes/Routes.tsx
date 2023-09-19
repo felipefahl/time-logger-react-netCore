@@ -4,6 +4,7 @@ import App from "../App";
 import ErrorPage from "../views/ErrorPage";
 import AddProjectTimeLog from "../views/AddProjectTimeLog";
 import ProjectTimeLogs from "../views/ProjectTimeLogs";
+import AddProject from "../views/AddProject";
 
 export default function Routes() {    
     const router = createBrowserRouter([
@@ -20,6 +21,11 @@ export default function Routes() {
         {
             path: "/timelogs",
             element: <ProjectTimeLogs />,
+            errorElement: <ErrorPage />,
+        },
+        {
+            path: "/add-project",
+            element: <AddProject />,
             errorElement: <ErrorPage />,
         },
       ]);

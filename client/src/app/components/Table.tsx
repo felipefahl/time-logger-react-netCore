@@ -1,7 +1,7 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Project, ProjectArray } from "../shared/interfaces/project.interface";
 import { useNavigate } from "react-router-dom";
-import { SelectedProjectContext, SelectedProjectType } from "../hooks/SelectedProjectProvider";
+import { useSelectedProject } from "../hooks/SelectedProjectProvider";
 
 interface Props {
     projects: ProjectArray;
@@ -10,7 +10,7 @@ interface Props {
 export default function Table({projects}: Props) {    
 
     const navigate = useNavigate();
-    const { selectPoject } = useContext(SelectedProjectContext) as SelectedProjectType;
+    const { selectPoject } = useSelectedProject();
 
     const handleAddTimeLog = (project : Project) => {
         selectPoject(project);

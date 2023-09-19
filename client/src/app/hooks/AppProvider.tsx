@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import SelectedProjectProvider from './SelectedProjectProvider';
+import { SelectedProjectProvider } from './SelectedProjectProvider';
 
 interface Props {
     children?: ReactNode

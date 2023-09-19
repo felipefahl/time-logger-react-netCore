@@ -10,7 +10,8 @@ using Timelogger.Interfaces.Services;
 
 namespace Timelogger.Application.Services
 {
-    public class ProjectService : IProjectService {
+    public class ProjectService : IProjectService
+    {
 
         private readonly IProjectRepository _projectRepository;
         private readonly ITimelogRepository _timelogRepository;
@@ -21,19 +22,28 @@ namespace Timelogger.Application.Services
             _timelogRepository = timelogRepository;
         }
 
-        public async Task<IList<Timelog>> GetProjectTimeLogListAsync(Guid id){
+        public async Task<Project> CreateAsync(Project project)
+        {
+            await _projectRepository.CreateAsync(project);
+            await _projectRepository.CommitAsync();
+            return project;
+        }
+
+        public async Task<IList<Timelog>> GetProjectTimeLogListAsync(Guid id)
+        {
             var project = await _projectRepository.GetAsync(id);
 
-            if(project == null)
+            if (project == null)
                 throw new NotFoundException("project", $"{id}");
 
             return project.TimeLogs.ToList();
         }
 
-        public async Task<Timelog> InsertProjectTimeLogAsync(Guid id, Timelog timelog, bool projectFinished) {
+        public async Task<Timelog> InsertProjectTimeLogAsync(Guid id, Timelog timelog, bool projectFinished)
+        {
             var project = await _projectRepository.GetAsync(id);
 
-            if(project == null)
+            if (project == null)
                 throw new NotFoundException("project", $"{id}");
 
             if (project.ClosedAt.HasValue)
@@ -54,17 +64,19 @@ namespace Timelogger.Application.Services
             return timelog;
         }
 
-        public async Task<IReadOnlyList<Project>> ListProjectAsync(bool orderByDeadline = false, bool onlyActives = false){
+        public async Task<IReadOnlyList<Project>> ListProjectAsync(bool sortByDeadline = false, bool onlyActives = false)
+        {
             var projects = Enumerable.Empty<Project>();
 
-            if(onlyActives){
+            if (onlyActives)
+            {
                 Expression<Func<Project, bool>> onlyActivesExtract = p => !p.ClosedAt.HasValue;
                 projects = await _projectRepository.GetAllByCriteriaAync(onlyActivesExtract);
             }
-            else    
+            else
                 projects = await _projectRepository.GetAllAsync();
 
-            projects = orderByDeadline ? projects.OrderBy(x => x.DeadLine).ToList() : projects.OrderByDescending(x => x.CreatedAt).ToList();  
+            projects = sortByDeadline ? projects.OrderBy(x => x.DeadLine).ToList() : projects.OrderByDescending(x => x.CreatedAt).ToList();
 
             return projects.ToList().AsReadOnly();
         }

@@ -15,8 +15,8 @@ namespace Timelogger.Api.Validations
 
         public TimelogInsertRequestValidator() 
         {
-            RuleFor(x => x.Note).MaximumLength(100);
-            RuleFor(x => x.DurationMinutes).GreaterThan(30);
+            RuleFor(x => x.Note).MaximumLength(100).WithMessage("Can not be greater than 100 character");
+            RuleFor(x => x.DurationMinutes).GreaterThanOrEqualTo(30).WithMessage("Must be greater then or equal to 30");
         }
     }
 }

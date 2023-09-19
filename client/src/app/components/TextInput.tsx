@@ -23,7 +23,9 @@ export default function Input ({
     multiline,
     className, 
     required, 
-    disabled
+    disabled,
+    min,
+    max
   } : TextInputProps) {
     const {
       register,
@@ -54,6 +56,7 @@ export default function Input ({
         {multiline ? (
           <textarea
             id={id}
+            data-testid={id}
             required={required} 
             disabled={disabled}
             className={cn(input_tailwind, 'min-h-[10rem] max-h-[20rem] resize-y')}
@@ -63,11 +66,14 @@ export default function Input ({
         ) : (
           <input
             id={id}
+            data-testid={id}
             required={required} 
             disabled={disabled}
             type={type}
             className={cn(input_tailwind)}
             placeholder={placeholder}
+            min={min}
+            max={max}
             {...register(name, validation)}
           />
         )}
@@ -81,6 +87,7 @@ export default function Input ({
   const InputError = function ({ message } : InputError) {
     return (
       <motion.p
+        data-testid={message}
         className="flex items-center gap-1 px-2 font-semibold text-red-500 bg-red-100 rounded-md"
         {...framer_error}
       >

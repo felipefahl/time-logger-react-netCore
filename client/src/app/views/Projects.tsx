@@ -3,6 +3,7 @@ import Table from "../components/Table";
 import { getAll } from "../api/projects";
 import FilterCheckbox from "../components/FilterCheckbox";
 import { ProjectArray } from "../shared/interfaces/project.interface";
+import { Link } from "react-router-dom";
 
 export default function Projects() {
     
@@ -10,14 +11,14 @@ export default function Projects() {
     const [filterProject, setFilterProject] = useState("");
     const [projects, setProjects] = useState<ProjectArray>([]);
     const [filteredProjects, setFilteredProjects] = useState<ProjectArray>([]);
-    const [orderByDeadline, setOrderByDeadline] = useState(false);
+    const [sortByDeadline, setSortByDeadline] = useState(false);
     const [onlyActives, setOnlyActives] = useState(false);
 
     useEffect(() => {
         setSearchField("");
         const fetchData = async () => {
             try {
-                const data = await getAll(orderByDeadline, onlyActives);
+                const data = await getAll(sortByDeadline, onlyActives);
                 setProjects(data);
                 setFilteredProjects(data);
             } catch (error) {
@@ -26,18 +27,18 @@ export default function Projects() {
         };
 
         fetchData();
-    }, [orderByDeadline, onlyActives]);
+    }, [sortByDeadline, onlyActives]);
 
     useEffect(() => {
         if(filterProject){
-            setFilteredProjects(projects.filter(item => item.name.includes(filterProject)))
+            setFilteredProjects(projects.filter(item => item.name.toLowerCase().includes(filterProject)))
         }
     }, [filterProject]);
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();    
         if(searchField)
-            setFilterProject(searchField);
+            setFilterProject(searchField.toLowerCase());
       };
 
       const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -52,9 +53,9 @@ export default function Projects() {
         <>
             <div className="flex items-center my-6">
                 <div className="w-1/2">
-                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Add entry
-                    </button>
+                    <Link className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" to="/add-project" relative="path">
+                        Add Project
+                    </Link>
                 </div>
 
                 <div className="w-1/2 flex justify-end">
@@ -79,8 +80,8 @@ export default function Projects() {
             <div>
                 <FilterCheckbox
                     labelText="Sort by Deadline:"
-                    checked={orderByDeadline}
-                    onChange={() => setOrderByDeadline(!orderByDeadline)}
+                    checked={sortByDeadline}
+                    onChange={() => setSortByDeadline(!sortByDeadline)}
                 />
             </div>
             <div>
